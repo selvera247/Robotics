@@ -4,7 +4,7 @@ Simulation-first Hugging Face [LeRobot](https://github.com/huggingface/lerobot) 
 
 Official install guide: https://huggingface.co/docs/lerobot/installation  
 Agent / learning companion: https://github.com/huggingface/lerobot/blob/main/AGENT_GUIDE.md  
-Architecture notes: [`docs/architecture.md`](docs/architecture.md) · Cursor rules: [`.cursorrules`](.cursorrules)
+Architecture notes: [`docs/architecture.md`](docs/architecture.md) · HF Jobs PushT: [`docs/hf_jobs_pusht.md`](docs/hf_jobs_pusht.md) · Cursor rules: [`.cursorrules`](.cursorrules)
 
 ## What this environment includes
 
@@ -82,6 +82,55 @@ lerobot-eval \
 ```
 
 Optional: browse more Hub datasets at https://huggingface.co/datasets?other=LeRobot or open https://huggingface.co/spaces/lerobot/visualize_dataset
+
+## HF Jobs: Train ACT on PushT
+
+This machine is CPU-only — **do not train locally**. Submit ACT training on [Hugging Face Jobs](https://huggingface.co/docs/hub/jobs), then eval the Hub checkpoint here with `--policy.device=cpu`. Full runbook: [`docs/hf_jobs_pusht.md`](docs/hf_jobs_pusht.md).
+
+This is the same **train → eval** shape we’ll use later for Lego-sorting demos.
+
+```bash
+hf auth login
+hf jobs hardware   # confirm t4-small / a10g-small
+
+HF_USER=$(NO_COLOR=1 hf auth whoami | awk -F': *' 'NR==1 {print $2}')
+source lerobot/.venv/bin/activate && cd lerobot
+
+lerobot-train \
+  --dataset.repo_id=lerobot/pusht \
+  --policy.type=act \
+  --policy.device=cuda \
+  --batch_size=8 \
+  --steps=20000 \
+  --save_freq=5000 \
+  --log_freq=200 \
+  --output_dir=outputs/train/act_pusht_hfjob \
+  --job_name=act_pusht_learn \
+  --policy.repo_id=${HF_USER}/act_pusht_learn \
+  --job.target=t4-small \
+  --job.timeout=4h \
+  --trackio.enable=true \
+  --trackio.space_id=${HF_USER}/lerobot-trackio
+```
+
+If `t4-small` is unavailable, use `--job.target=a10g-small`. Ctrl-C detaches; the job keeps running.
+
+**After the job finishes — eval on this CPU box:**
+
+```bash
+source lerobot/.venv/bin/activate && cd lerobot
+HF_USER=$(NO_COLOR=1 hf auth whoami | awk -F': *' 'NR==1 {print $2}')
+
+lerobot-eval \
+  --policy.path=${HF_USER}/act_pusht_learn \
+  --env.type=pusht \
+  --eval.n_episodes=10 \
+  --eval.batch_size=1 \
+  --policy.device=cpu \
+  --policy.dtype=float32 \
+  --policy.use_amp=false \
+  --output_dir=../outputs/eval/act_pusht_own
+```
 
 ## Tests for this repo's helpers
 
