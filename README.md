@@ -4,7 +4,7 @@ Simulation-first Hugging Face [LeRobot](https://github.com/huggingface/lerobot) 
 
 Official install guide: https://huggingface.co/docs/lerobot/installation  
 Agent / learning companion: https://github.com/huggingface/lerobot/blob/main/AGENT_GUIDE.md  
-(also see [`.cursorrules`](.cursorrules) in this repo)
+Architecture notes: [`docs/architecture.md`](docs/architecture.md) · Cursor rules: [`.cursorrules`](.cursorrules)
 
 ## What this environment includes
 
@@ -13,6 +13,7 @@ Agent / learning companion: https://github.com/huggingface/lerobot/blob/main/AGE
 | Python | 3.12 via `uv` venv |
 | Install | Editable `lerobot` with `core_scripts` + `training` + `feetech` + `lekiwi` + `pusht` |
 | Video | System `ffmpeg` (TorchCodec) |
+| Helpers | `learning/` package — typed smoke checks for env + Hub datasets |
 | Hardware | Feetech / LeKiwi extras present for later — **not connected** |
 
 ## Setup (once)
@@ -23,7 +24,7 @@ Requires [uv](https://docs.astral.sh/uv/) and `ffmpeg` (`sudo apt install ffmpeg
 bash scripts/setup_lerobot.sh
 ```
 
-That script will:
+That script (helpers in `scripts/lib/lerobot_env.sh`) will:
 
 1. Install `uv` if needed  
 2. Clone `https://github.com/huggingface/lerobot.git` into `./lerobot`  
@@ -36,7 +37,7 @@ Activate in every new shell:
 
 ```bash
 source lerobot/.venv/bin/activate
-cd lerobot
+cd /path/to/this/repo   # repo root, so `learning` is importable
 lerobot-info
 ```
 
@@ -55,12 +56,12 @@ lerobot-info
 
 ## Next commands (no hardware)
 
-After `source lerobot/.venv/bin/activate` and `cd lerobot`, run these:
+From the **repo root** with the venv active:
 
-**1. Load a public dataset**
+**1. Probe env + a public dataset** (preferred over ad-hoc one-liners)
 
 ```bash
-python -c "from lerobot.datasets.lerobot_dataset import LeRobotDataset; ds = LeRobotDataset('lerobot/pusht', episodes=[0]); print(ds.repo_id, 'frames=', len(ds), 'features=', list(ds.features))"
+python -m learning.smoke --dataset lerobot/pusht --episodes 0
 ```
 
 **2. Visualize one episode** (opens Rerun)
@@ -81,6 +82,13 @@ lerobot-eval \
 ```
 
 Optional: browse more Hub datasets at https://huggingface.co/datasets?other=LeRobot or open https://huggingface.co/spaces/lerobot/visualize_dataset
+
+## Tests for this repo's helpers
+
+```bash
+source lerobot/.venv/bin/activate
+PYTHONPATH=. python -m pytest learning/tests -q
+```
 
 ## When you get SO-101 / LeKiwi hardware
 

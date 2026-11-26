@@ -11,6 +11,8 @@ https://github.com/huggingface/lerobot/blob/main/AGENT_GUIDE.md
 
 Local copy after setup: `lerobot/AGENT_GUIDE.md`
 
+Repo architecture map: `docs/architecture.md`
+
 That guide requires asking about goal, hardware, GPU, skill level, dataset, and
 the concrete next step — then picking the simplest path that fits.
 
@@ -22,14 +24,15 @@ bash scripts/setup_lerobot.sh
 
 # Every shell
 source lerobot/.venv/bin/activate
-cd lerobot
+# Stay at repo root so `python -m learning.smoke` resolves
 ```
 
 Official install docs: https://huggingface.co/docs/lerobot/installation
 
 ## Constraints for this workspace
 
-- Prefer simulation (`pusht`, Hub datasets, `lerobot-eval`) until hardware is available.
+- Prefer simulation (`pusht`, Hub datasets, `lerobot-eval`, `python -m learning.smoke`) until hardware is available.
 - Do **not** assume USB ports, cameras, or motors are connected.
-- This machine may be CPU-only; use `--policy.device=cpu` (or `mps` on Apple Silicon) unless CUDA is verified via `lerobot-info`.
+- This machine may be CPU-only; use `--policy.device=cpu` (or `mps` on Apple Silicon) unless CUDA is verified via `lerobot-info` / `learning.smoke`.
 - Feetech / SO-101 / LeKiwi extras are installed for later; skip `lerobot-find-port`, calibrate, record, and rollout until hardware is present.
+- Do not vendor or rewrite upstream `lerobot/` in this git repo (`lerobot/` is gitignored). Prefer thin helpers under `learning/` and setup scripts under `scripts/`.
