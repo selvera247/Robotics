@@ -18,6 +18,8 @@ wandb/
 data/
 *.rrd
 
+# Checked-in demo clips live under artifacts/ (not ignored)
+
 # OS / editor
 .DS_Store
 .idea/
