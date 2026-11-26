@@ -63,6 +63,41 @@ hf jobs logs <job-id>
 hf jobs cancel <job-id>
 ```
 
+## Learning run (smaller / cheaper)
+
+Same **train → eval** shape as above (and as later Lego demos) — just fewer steps (~2–3 epochs on PushT) to verify Jobs + ACT before a full 20k run.
+
+```bash
+hf auth login
+HF_USER=$(NO_COLOR=1 hf auth whoami | awk -F': *' 'NR==1 {print $2}')
+source lerobot/.venv/bin/activate && cd lerobot
+
+lerobot-train \
+  --dataset.repo_id=lerobot/pusht \
+  --policy.type=act \
+  --policy.device=cuda \
+  --batch_size=8 \
+  --steps=8000 \
+  --save_freq=4000 \
+  --log_freq=200 \
+  --output_dir=outputs/train/act_pusht_learn_small \
+  --job_name=act_pusht_learn_small \
+  --policy.repo_id=${HF_USER}/act_pusht_learn_small \
+  --job.target=t4-small \
+  --job.timeout=2h \
+  --trackio.enable=true \
+  --trackio.space_id=${HF_USER}/lerobot-trackio
+```
+
+Rough cost (from `hf jobs hardware`; wall clock includes image pull + dataset download, not pure step time):
+
+| Flavor | $/hour | Likely wall for 8k steps | Est. cost |
+| --- | --- | --- | --- |
+| `t4-small` | $0.40 | ~20–45 min | ~$0.15–$0.30 |
+| `a10g-small` | $1.00 | ~15–35 min | ~$0.25–$0.60 |
+
+Prefer `t4-small` for learning. After the job, eval with the CPU command below, swapping `act_pusht_learn` → `act_pusht_learn_small`. Expect lower success than a full 20k run; the goal is path familiarity.
+
 ## Eval locally (CPU)
 
 After the Hub model exists:
