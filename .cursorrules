@@ -1,0 +1,35 @@
+# LeRobot / SO-101 / LeKiwi — agent guidance
+
+This repo is a **simulation-first** LeRobot workspace for learning robotics with the
+SO-101 and LeKiwi ecosystem. No robot hardware is assumed connected.
+
+## Read this first (mandatory)
+
+Before suggesting robot, training, recording, or calibration commands, follow:
+
+https://github.com/huggingface/lerobot/blob/main/AGENT_GUIDE.md
+
+Local copy after setup: `lerobot/AGENT_GUIDE.md`
+
+That guide requires asking about goal, hardware, GPU, skill level, dataset, and
+the concrete next step — then picking the simplest path that fits.
+
+## Install / activate
+
+```bash
+# First time (or recreate)
+bash scripts/setup_lerobot.sh
+
+# Every shell
+source lerobot/.venv/bin/activate
+cd lerobot
+```
+
+Official install docs: https://huggingface.co/docs/lerobot/installation
+
+## Constraints for this workspace
+
+- Prefer simulation (`pusht`, Hub datasets, `lerobot-eval`) until hardware is available.
+- Do **not** assume USB ports, cameras, or motors are connected.
+- This machine may be CPU-only; use `--policy.device=cpu` (or `mps` on Apple Silicon) unless CUDA is verified via `lerobot-info`.
+- Feetech / SO-101 / LeKiwi extras are installed for later; skip `lerobot-find-port`, calibrate, record, and rollout until hardware is present.

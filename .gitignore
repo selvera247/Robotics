@@ -1,0 +1,24 @@
+# Local LeRobot clone + virtualenv (recreate with scripts/setup_lerobot.sh)
+lerobot/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Hugging Face / training artifacts
+.cache/
+outputs/
+wandb/
+data/
+*.rrd
+
+# OS / editor
+.DS_Store
+.idea/
+*.swp
